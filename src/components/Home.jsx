@@ -85,6 +85,11 @@ const Home = () => {
             </div>
           </div>
         </div>
+
+        {/* Chat */}
+        <div className="bg-[#36393f] flex-grow">
+          Chat
+        </div>
       </div>
     </>
   )
