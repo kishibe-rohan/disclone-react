@@ -3,24 +3,53 @@ import { MicrophoneIcon, PhoneIcon, CogIcon } from "@heroicons/react/solid";
 
 import ServerIcon from "./ServerIcon";
 import Channel from './Channel';
+import Chat from './Chat'
+
+import { auth, db } from "../firebase";
+import { collection, addDoc } from "firebase/firestore";
+import {signOut} from 'firebase/auth';
+import { useCollection } from "react-firebase-hooks/firestore";
+import { useAuthState } from "react-firebase-hooks/auth";
+
+import {Navigate} from 'react-router-dom'
+
 
 const Home = () => {
+  const [user] = useAuthState(auth);
+  const [channels] = useCollection(collection(db,"channels"));
 
+ /*
   const channels = [
     {id:1,name:"among-us-lfg"},
     {id:2,name:"valorant-lfg"},
     {id:3,name:"uno-lfg"},
     {id:4,name:"tarkov-lfg"}
   ]
+ */
 
+  /*
   const user={
     uid:"87318511",
     displayName:"Yuno",
     photoURL:"https://i.ibb.co/HG30vhL/schezwan.png"
   }
+  */
+
+  const handleAddChannel = async() => {
+    const channelName = prompt("Enter a new channel name");
+  
+    if(channelName){
+      await addDoc(collection(db,"channels"),{
+          channelName:channelName,
+      })
+
+
+    }
+  }
 
   return (
     <>
+      {!user && <Navigate to="/"/>}
       <div className="flex h-screen">
         <div className="flex flex-col space-y-3 bg-[#202225] p-3 min-w-max">
 
@@ -51,11 +80,12 @@ const Home = () => {
               <h4 className="font-semibold ">Channels</h4>
               <PlusIcon
                 className="h-6 ml-auto cursor-pointer hover:text-white"
+                onClick={handleAddChannel}
               />
             </div>
             <div className="flex flex-col space-y-2 px-2 mb-4">
-              {channels.map((channel) => (
-                <Channel key={channel.id} id={channel.id} channelName={channel.name}/>
+              {channels?.docs.map((channel) => (
+                <Channel key={channel.id} id={channel.id} channelName={channel.data().channelName}/>
               ))}
             </div>
           </div>
@@ -63,7 +93,7 @@ const Home = () => {
           {/*User Info*/}
           <div className="bg-[#292b2f] p-2 flex justify-between items-center space-x-4">
             <div className="flex items-center space-x-1">
-              <img src={user?.photoURL} alt="" className="h-10 rounded-full"/>
+              <img src={user?.photoURL} alt="" className="h-10 rounded-full"  onClick={() => signOut(auth)}/>
               <h4 className="text-white text-xs font-medium">
                 {user?.displayName}{" "}
                 <span className="text-[#b9bbbe] block">
@@ -88,7 +118,7 @@ const Home = () => {
 
         {/* Chat */}
         <div className="bg-[#36393f] flex-grow">
-          Chat
+          <Chat/>             
         </div>
       </div>
     </>
